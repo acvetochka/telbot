@@ -1,4 +1,4 @@
-module github.com/acvetochka/telebot
+module github.com/acvetochka/telbot
 
 go 1.22.1
 
