@@ -1,5 +1,5 @@
 APP=$(shell basename $(shell git remote get-url origin))
-REGISTRY=acvetochka
+REGESTRY := ghcr.io/acvetochka
 # VERSION=$(shell git describe --tags --abbrev=0)-$(shell git rev-parse --short HEAD)
 VERSION=1.0.0
 TARGETOS=linux
@@ -31,10 +31,10 @@ windows:
 	GOOS=windows GOARCH=amd64 go build -v -o telbot -ldflags "-X="github.com/acvetochka/telbot/cmd.appVersion=${VERSION}
 
 image:
-	docker build . -t ${REGISTRY}/${APP}:${VERSION}-${TARGETARCH}
+	docker build . -t ${REGESTRY}/${APP}:${VERSION}-${TARGETARCH}
 
 push:
-	docker push ${REGISTRY}/${APP}:${VERSION}-${TARGETARCH}
+	docker push ${REGESTRY}/${APP}:${VERSION}-${TARGETARCH}
 
 clean:
 	@rm -f telbot
