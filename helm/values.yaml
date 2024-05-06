@@ -5,7 +5,8 @@
 replicaCount: 1
 
 image:
-  repository: acvetochka
+  registry: "ghcr.io"
+  repository: "acvetochka/telbot"
   tag: "v1.0.0-82050c9"
   arch: amd64
 secret:
