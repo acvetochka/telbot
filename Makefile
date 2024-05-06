@@ -1,7 +1,8 @@
 APP=$(shell basename $(shell git remote get-url origin))
 REGESTRY := ghcr.io/acvetochka
 # VERSION=$(shell git describe --tags --abbrev=0)-$(shell git rev-parse --short HEAD)
-VERSION=1.0.0
+# VERSION=1.0.0
+VERSION=$(shell git describe --tags --abbrev=0 --always)-$(shell git rev-parse --short HEAD)
 TARGETOS=linux
 TARGETARCH=arm64
 # $(shell dpkg --print-archetecture)
