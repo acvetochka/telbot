@@ -4,7 +4,7 @@ REGESTRY := ghcr.io/acvetochka
 # VERSION=1.0.0
 VERSION=$(shell git describe --tags --abbrev=0 --always)-$(shell git rev-parse --short HEAD)
 TARGETOS=linux
-TARGETARCH=arm64
+TARGETARCH=amd64
 # $(shell dpkg --print-archetecture)
 
 format: 
@@ -35,10 +35,10 @@ windows:
 	GOOS=windows GOARCH=amd64 go build -v -o telbot -ldflags "-X="github.com/acvetochka/telbot/cmd.appVersion=${VERSION}
 
 image:
-	docker build . -t ${REGESTRY}/${APP}:${VERSION}-${TARGETARCH}
+	docker build . -t ${REGESTRY}/${APP}:${VERSION}-${TARGETOS}-${TARGETARCH}
 
 push:
-	docker push ${REGESTRY}/${APP}:${VERSION}-${TARGETARCH}
+	docker push ${REGESTRY}/${APP}:${VERSION}-${TARGETOS}-${TARGETARCH}
 
 clean:
 	@rm -f telbot
