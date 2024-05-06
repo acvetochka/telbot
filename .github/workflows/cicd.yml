@@ -16,3 +16,17 @@ jobs:
           fetch-depth: 0
       - name: Run test
         run: make test
+
+      - name: Build&Push
+        env:
+          APP: "telbot"
+        run: make image push
+  cd:
+    name: CD
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0 
+    - run: echo "VERSION=$(git describe --tags --abbrev=0 --always)-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
