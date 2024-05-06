@@ -15,6 +15,9 @@ get:
 lint:
 	golint
 
+test:
+	go test -v
+
 build: format get
 	CGO_ENABLED=0 GOOS=$(TARGETOS) GOARCH=amd64 go build -v -o telbot -ldflags "-X="github.com/acvetochka/telbot/cmd.appVersion=${VERSION}
 
