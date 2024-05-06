@@ -3,17 +3,15 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-
 image:
   registry: "ghcr.io"
   repository: "acvetochka/telbot"
-  tag: "v1.0.0-82050c9"
-  os: linux
-  arch: amd64
+  tag: "v1.0.1-510d6d1"
+  os: ""
+  arch: ""
 secret:
   name: "telbot"
   env: "TELE_TOKEN"
   key: "token"
 securityContext:
   privileged: true
-
