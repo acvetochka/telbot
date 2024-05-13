@@ -1,5 +1,7 @@
 REGISTRY := ghcr.io/acvetochka
-VERSION := $($(shell git describe --tags --abbrev=0 --always)-$(shell git rev-parse --short HEAD))
+VERSION := $(shell git describe --tags --abbrev=0 --always)-$(shell git rev-parse --short HEAD)
+# VERSION := $($(shell git describe --tags --abbrev=0 --always)-$(shell git rev-parse --short HEAD))
+
 ifndef VERSION
     VERSION := 1.0.1
 endif
