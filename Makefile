@@ -1,15 +1,11 @@
-REGISTRY := ghcr.io/acvetochka
-VERSION := $(shell git describe --tags --abbrev=0 --always)-$(shell git rev-parse --short HEAD)
-# VERSION := $($(shell git describe --tags --abbrev=0 --always)-$(shell git rev-parse --short HEAD))
-
-ifndef VERSION
-    VERSION := 1.0.1
-endif
-
-APP := $(notdir $(REPO))
-
-TARGETOS := $(OS)
-TARGETARCH := $(ARCH)
+APP=$(shell basename $(shell git remote get-url origin))
+REGESTRY := ghcr.io/acvetochka
+# VERSION=$(shell git describe --tags --abbrev=0)-$(shell git rev-parse --short HEAD)
+# VERSION=1.0.0
+VERSION=$(shell git describe --tags --abbrev=0 --always)-$(shell git rev-parse --short HEAD)
+TARGETOS=linux
+TARGETARCH=amd64
+# $(shell dpkg --print-archetecture)
 
 format: 
 	gofmt -s -w ./
@@ -24,32 +20,25 @@ test:
 	go test -v
 
 build: format get
-	echo "Building binary for platform $(TARGETOS) on $(TARGETARCH)"
-	CGO_ENABLED=0 GOOS=$(TARGETOS) GOARCH=$(TARGETARCH) go build -v -o telbot -ldflags "-X=github.com/acvetochka/telbot/cmd.appVersion=${VERSION}"
+	CGO_ENABLED=0 GOOS=$(TARGETOS) GOARCH=amd64 go build -v -o telbot -ldflags "-X="github.com/acvetochka/telbot/cmd.appVersion=${VERSION}
 
 linux:
-	echo "Building binary for Linux on amd64"
-	GOOS=linux GOARCH=amd64 go build -v -o telbot -ldflags "-X=github.com/acvetochka/telbot/cmd.appVersion=${VERSION}"
+	GOOS=linux GOARCH=amd64 go build -v -o telbot -ldflags "-X="github.com/acvetochka/telbot/cmd.appVersion=${VERSION}
 
 arm:
-	echo "Building binary for Linux on arm64"
-	GOOS=linux GOARCH=arm64 go build -v -o telbot -ldflags "-X=github.com/acvetochka/telbot/cmd.appVersion=${VERSION}"
+	GOOS=linux GOARCH=arm64 go build -v -o telbot -ldflags "-X="github.com/acvetochka/telbot/cmd.appVersion=${VERSION}
 
 macos:
-	echo "Building binary for macOS on amd64"
-	GOOS=darwin GOARCH=amd64 go build -v -o telbot -ldflags "-X=github.com/acvetochka/telbot/cmd.appVersion=${VERSION}"
+	GOOS=darwin GOARCH=amd64 go build -v -o telbot -ldflags "-X="github.com/acvetochka/telbot/cmd.appVersion=${VERSION}
 
 windows:
-	echo "Building binary for Windows on amd64"
-	GOOS=windows GOARCH=amd64 go build -v -o telbot -ldflags "-X=github.com/acvetochka/telbot/cmd.appVersion=${VERSION}"
+	GOOS=windows GOARCH=amd64 go build -v -o telbot -ldflags "-X="github.com/acvetochka/telbot/cmd.appVersion=${VERSION}
 
 image:
-	echo "Building Docker image for platform $(TARGETOS) on $(TARGETARCH)"
-	docker build . -t ${REGISTRY}/${APP}:${VERSION}-${TARGETOS}-${TARGETARCH}
+	docker build . -t ${REGESTRY}/${APP}:${VERSION}-${TARGETOS}-${TARGETARCH}
 
 push:
-	echo "Pushing Docker image for platform $(TARGETOS) on $(TARGETARCH)"
-	docker push ${REGISTRY}/${APP}:${VERSION}-${TARGETOS}-${TARGETARCH}
+	docker push ${REGESTRY}/${APP}:${VERSION}-${TARGETOS}-${TARGETARCH}
 
 clean:
 	@rm -f telbot
