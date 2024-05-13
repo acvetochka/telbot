@@ -31,3 +31,4 @@ variable "FLUX_GITHUB_TARGET_PATH" {
   default     = "clusters"
   description = "Flux manifests subdirectory"
 }
+
