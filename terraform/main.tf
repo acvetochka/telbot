@@ -3,12 +3,12 @@ module "kind_cluster" {
 }
 
 module "github_repository" {
-  source                   = "github.com/acvetochka/tf-modules/tf-github-repository"
+  source                   = "github.com/den-vasyliev/tf-github-repository"
   github_owner             = var.GITHUB_OWNER
   github_token             = var.GITHUB_TOKEN
   repository_name          = var.FLUX_GITHUB_REPO
   public_key_openssh       = module.tls_private_key.public_key_openssh
-  public_key_openssh_title = "flux0"
+  public_key_openssh_title = "flux"
 }
 
 module "tls_private_key" {
@@ -16,11 +16,22 @@ module "tls_private_key" {
   algorithm = "RSA"
 }
 
+# module "flux_bootstrap" {
+#   source            = "github.com/den-vasyliev/tf-fluxcd-flux-bootstrap?ref=kind_auth"
+#   github_repository = "${var.GITHUB_OWNER}/${var.FLUX_GITHUB_REPO}"
+#   private_key       = module.tls_private_key.private_key_pem
+#   config_path       = "${path.module}/kind-config" # module.gke_cluster.kubeconfig
+#   github_token      = var.GITHUB_TOKEN
+# }
+
 module "flux_bootstrap" {
   source            = "github.com/acvetochka/tf-modules//tf-fluxcd-flux-bootstrap?ref=kind_auth"
   github_repository = "${var.GITHUB_OWNER}/${var.FLUX_GITHUB_REPO}"
   private_key       = module.tls_private_key.private_key_pem
-  config_path       = "${path.module}/kind-config" # module.gke_cluster.kubeconfig
+  config_host       = module.kind_cluster.endpoint
+  config_client_key = module.kind_cluster.client_key
+  config_ca         = module.kind_cluster.ca
+  config_crt        = module.kind_cluster.crt
   github_token      = var.GITHUB_TOKEN
 }
 
@@ -31,9 +42,9 @@ module "gke_cluster" {
   GKE_NUM_NODES  = 2
 }
 
-# terraform {
-#   backend "gcs" {
-#     bucket = "tf-secret"
-#     prefix = "terraform/state"
-#   }
-# }
+terraform {
+  backend "gcs" {
+    bucket = "tf-secret"
+    prefix = "terraform/state"
+  }
+}
