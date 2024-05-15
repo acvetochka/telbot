@@ -3,27 +3,26 @@
 # Функція для встановлення gitleaks
 install_gitleaks() {
     # Визначення операційної системи
-    os=$(uname -s | tr '[:upper:]' '[:lower:]')
+    OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+
+    # Визначення архітектури
+    ARCH=$(uname -m)
 
     # Перевірка, чи вже встановлено gitleaks
     if ! command -v gitleaks &> /dev/null; then
         echo "Installing gitleaks..."
-        
-        # Встановлення gitleaks залежно від операційної системи
-        if [ "$os" = "darwin" ]; then
-            # Встановлення gitleaks для macOS
-            curl -sSfL https://github.com/zricethezav/gitleaks/releases/latest/download/gitleaks-darwin-amd64 -o gitleaks
-        elif [ "$os" = "linux" ]; then
-            # Встановлення gitleaks для Linux
-            curl -sSfL https://github.com/zricethezav/gitleaks/releases/latest/download/gitleaks-linux-amd64 -o gitleaks
-        elif [ "$os" = "windows" ]; then
-            # Встановлення gitleaks для Windows
-            curl -sSfL https://github.com/zricethezav/gitleaks/releases/latest/download/gitleaks-windows-amd64.exe -o gitleaks.exe
-        else
-            echo "Unsupported operating system: $os"
-            exit 1
-        fi
-        
+
+        # Отримати останню версію релізу gitleaks
+        latest_version=$(curl -sSL https://api.github.com/repos/zricethezav/gitleaks/releases/latest | grep -o '"tag_name": ".*"' | sed 's/"tag_name": "//' | sed 's/"//')
+
+        # Сконструювати посилання для завантаження
+        download_link="https://github.com/zricethezav/gitleaks/releases/download/$latest_version/gitleaks_$latest_version_${OS}_${ARCH}.tar.gz"
+
+        # Завантажити gitleaks з обраного посилання
+        curl -sSfL "$download_link" -o gitleaks.tar.gz 
+
+        # Розпакувати архів
+        tar -xf gitleaks.tar.gz
         chmod +x gitleaks
         mv gitleaks /usr/local/bin/gitleaks
     fi
