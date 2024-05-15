@@ -1,0 +1,54 @@
+#!/bin/sh
+
+# Функція для встановлення gitleaks
+install_gitleaks() {
+    # Визначення операційної системи
+    os=$(uname -s | tr '[:upper:]' '[:lower:]')
+
+    # Перевірка, чи вже встановлено gitleaks
+    if ! command -v gitleaks &> /dev/null; then
+        echo "Installing gitleaks..."
+        
+        # Встановлення gitleaks залежно від операційної системи
+        if [ "$os" = "darwin" ]; then
+            # Встановлення gitleaks для macOS
+            curl -sSfL https://github.com/zricethezav/gitleaks/releases/latest/download/gitleaks-darwin-amd64 -o gitleaks
+        elif [ "$os" = "linux" ]; then
+            # Встановлення gitleaks для Linux
+            curl -sSfL https://github.com/zricethezav/gitleaks/releases/latest/download/gitleaks-linux-amd64 -o gitleaks
+        elif [ "$os" = "windows" ]; then
+            # Встановлення gitleaks для Windows
+            curl -sSfL https://github.com/zricethezav/gitleaks/releases/latest/download/gitleaks-windows-amd64.exe -o gitleaks.exe
+        else
+            echo "Unsupported operating system: $os"
+            exit 1
+        fi
+        
+        chmod +x gitleaks
+        mv gitleaks /usr/local/bin/gitleaks
+    fi
+}
+
+# Встановлення gitleaks
+install_gitleaks
+
+# Перевірка, чи увімкнена перевірка gitleaks через git config
+gitleaks_check_enabled=$(git config --get hooks.gitleakscheck)
+
+if [ "$gitleaks_check_enabled" != "true" ]; then
+    echo "gitleaks check is disabled via git config. Skipping gitleaks check."
+    exit 0
+fi
+
+# Виконання gitleaks для перевірки наявності секретів
+echo "Running gitleaks..."
+gitleaks --path=. --verbose
+
+# Якщо gitleaks знайшов секретні дані, відхиляємо коміт
+if [ $? -ne 0 ]; then
+    echo "Commit rejected: gitleaks found sensitive data."
+    exit 1
+fi
+
+echo "No sensitive data found. Commit allowed."
+exit 0
