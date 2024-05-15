@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Функція для встановлення gitleaks
 install_gitleaks() {
@@ -10,33 +10,56 @@ install_gitleaks() {
 
     # Перевірка, чи вже встановлено gitleaks
     if ! command -v gitleaks &> /dev/null; then
+        
+
+    #  if [[ ! -f ./gitleaks ]]; then
         echo "Installing gitleaks..."
+        # Завантажуємо останню версію gitleaks з GitHub
+        # Отримуємо посилання для завантаження gitleaks
+        download_link=$(curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest | grep browser_download_url | cut -d '"' -f 4 | grep "${OS}_${ARCH}")
 
-        # Отримати останню версію релізу gitleaks
-        latest_version=$(curl -sSL https://api.github.com/repos/zricethezav/gitleaks/releases/latest | grep -o '"tag_name": ".*"' | sed 's/"tag_name": "//' | sed 's/"//')
+        # curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest | grep browser_download_url | cut -d '"' -f 4 | grep "${OS}_${ARCH}" | wget -i - -O gitleaks.tag.gz -q
 
-        # Сконструювати посилання для завантаження
-        download_link="https://github.com/zricethezav/gitleaks/releases/download/$latest_version/gitleaks_$latest_version_${OS}_${ARCH}.tar.gz"
+        # Розпаковуємо архів та переміщаємо gitleaks у відповідне місце
+        # Розпакування архіву gitleaks
 
-        # Завантажити gitleaks з обраного посилання
-        curl -sSfL "$download_link" -o gitleaks.tar.gz 
+        # Перевіряємо, чи download_link містить значення
+        if [[ ! -z "$download_link" ]]; then
+            # Завантажуємо gitleaks
+            wget "$download_link" -O gitleaks.tar.gz -q
+            
+            # Розпаковуємо архіву gitleaks
+            if [[ "$download_link" == *".tar.gz" ]]; then
+                tar -xf gitleaks.tar.gz gitleaks
+            elif [[ "$download_link" == *".zip" ]]; then
+                unzip gitleaks.tar.gz gitleaks
+            fi
 
-        # Розпакувати архів
-        tar -xf gitleaks.tar.gz
-        chmod +x gitleaks
-        mv gitleaks /usr/local/bin/gitleaks
+            # Видаляємо тимчасовий архів
+            rm gitleaks.tar.gz
+            
+            # Зміщуємо gitleaks у відповідне місце
+            # mv gitleaks /usr/local/bin/gitleaks
+
+            # Надаємо права на виконання
+            chmod +x gitleaks
+            # chmod +x /usr/local/bin/gitleaks
+        fi
     fi
+
 }
 
-# Встановлення gitleaks
-install_gitleaks
+
 
 # Перевірка, чи увімкнена перевірка gitleaks через git config
-gitleaks_check_enabled=$(git config --get hooks.gitleakscheck)
+gitleaks_check_enabled=$(git config --get hooks.gitleaks.enable)
 
 if [ "$gitleaks_check_enabled" != "true" ]; then
     echo "gitleaks check is disabled via git config. Skipping gitleaks check."
     exit 0
+else 
+    # Встановлення gitleaks
+    install_gitleaks
 fi
 
 # Виконання gitleaks для перевірки наявності секретів
