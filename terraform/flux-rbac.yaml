@@ -1,0 +1,9 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: flux-manager
+  namespace: flux-system
+rules:
+- apiGroups: [""]
+  resources: ["deployments", "services", "configmaps", "secrets", "pods", "ingresses"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]

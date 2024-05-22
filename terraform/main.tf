@@ -17,6 +17,7 @@ module "tls_private_key" {
 }
 
 module "flux_bootstrap" {
+  # source            = "./modules/flux-bootstrap"
   source            = "github.com/acvetochka/tf-modules//tf-fluxcd-flux-bootstrap?ref=kind_auth"
   github_repository = "${var.GITHUB_OWNER}/${var.FLUX_GITHUB_REPO}"
   private_key       = module.tls_private_key.private_key_pem

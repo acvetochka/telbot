@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+
+# Функція для встановлення gitleaks
+install_gitleaks() {
+    # Визначення операційної системи
+    if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
+        OS="windows"
+    else
+        OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+    fi
+
+    echo $OS
+
+    # Визначення архітектури
+    ARCH=$(uname -m)
+    case $ARCH in
+        x86_64)
+            ARCH="x64"
+            ;;
+        *arm*)
+            ARCH="armv7"
+            ;;
+    esac
+
+echo $ARCH
+    # Перевірка, чи вже встановлено gitleaks
+    if ! command -v gitleaks &> /dev/null; then       
+        echo "Installing gitleaks..."
+        download_link=$(curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest | grep browser_download_url | cut -d '"' -f 4 | grep "${OS}_${ARCH}")
+        echo "Download link: $download_link"
+
+        # Перевіряємо, чи download_link містить значення
+        if [[ ! -z "$download_link" ]]; then
+            # Завантажуємо gitleaks
+            if [[ "$OS" == "windows" ]]; then
+                curl -L "$download_link" -o gitleaks.zip
+            else
+                wget "$download_link" -O gitleaks.tar.gz -q
+            fi
+            
+            # Розпаковуємо архів gitleaks
+            if [[ "$download_link" == *".tar.gz" ]]; then
+                tar -xf gitleaks.tar.gz gitleaks
+                rm gitleaks.tar.gz
+            elif [[ "$download_link" == *".zip" ]]; then
+                unzip gitleaks.zip 
+                rm gitleaks.zip
+            fi
+            chmod +x gitleaks   
+        fi
+    fi
+
+}
+
+# Перевірка, чи увімкнена перевірка gitleaks через git config
+gitleaks_check_enabled=$(git config --get hooks.gitleaks.enable)
+
+if [ "$gitleaks_check_enabled" != "true" ]; then
+    echo "gitleaks check is disabled via git config. Skipping gitleaks check."
+    exit 0
+else 
+    # Перевірка на наявність та встановлення gitleaks
+    install_gitleaks
+fi
+
+# Виконання gitleaks для перевірки наявності секретів
+echo "Running gitleaks..."
+gitleaks detect --source . --verbose --redact
+
+# Якщо gitleaks знайшов секретні дані, відхиляємо коміт
+if [ $? -ne 0 ]; then
+    echo "Commit rejected: gitleaks found sensitive data."
+    git restore --staged .
+    exit 1
+fi
+
+echo "No sensitive data found. Commit allowed."
+exit 0
